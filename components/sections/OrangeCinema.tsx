@@ -22,28 +22,28 @@ const CINEMA_SCENES: SceneOverlay[] = [
     title: "IT STARTS WITH ONE.",
     subtitle:
       "A singular fruit selected for exceptional vitality and solar depth.",
-    positionClass: "top-6 left-4 sm:left-6 text-left max-w-sm",
+    positionClass: "top-4 sm:top-8 left-4 sm:left-6 text-left max-w-[280px] sm:max-w-sm",
   },
   {
     tag: "02 // CHARACTER",
     title: "NATURALLY BOLD.",
     subtitle:
       "Raw citrus oil and aromatic terpenes captured in suspension.",
-    positionClass: "bottom-14 right-4 sm:right-6 text-right max-w-sm ml-auto",
+    positionClass: "bottom-14 sm:bottom-16 right-4 sm:right-6 text-right max-w-[280px] sm:max-w-sm ml-auto",
   },
   {
     tag: "03 // PRESENCE",
     title: "IMPOSSIBLE TO IGNORE.",
     subtitle:
       "Colour that commands attention without speaking a word.",
-    positionClass: "top-6 right-4 sm:right-6 text-right max-w-sm ml-auto",
+    positionClass: "top-4 sm:top-8 right-4 sm:right-6 text-right max-w-[280px] sm:max-w-sm ml-auto",
   },
   {
     tag: "04 // HARVEST",
     title: "THE BEAUTY OF ORANGE.",
     subtitle:
       "Nature's architecture transformed into bottled art.",
-    positionClass: "bottom-14 left-4 sm:left-6 text-left max-w-sm",
+    positionClass: "bottom-14 sm:bottom-16 left-4 sm:left-6 text-left max-w-[280px] sm:max-w-sm",
   },
 ];
 
@@ -61,7 +61,7 @@ export function OrangeCinema() {
   const currentFrameIndexRef = useRef(0);
   const rafIdRef = useRef<number | null>(null);
 
-  // Draw image frame with CENTER + COVER
+  // Draw image frame with responsive cinematic adaptive scaling
   const drawFrame = useCallback((index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -94,23 +94,39 @@ export function OrangeCinema() {
     const canvasAspect = width / height;
     const imageAspect = imgWidth / imgHeight;
 
-    let drawWidth = width;
-    let drawHeight = height;
+    let drawWidth: number;
+    let drawHeight: number;
+    let drawX: number;
+    let drawY: number;
 
-    // Cover calculation
-    if (imageAspect > canvasAspect) {
-      drawHeight = height;
-      drawWidth = height * imageAspect;
-    } else {
+    if (canvasAspect >= imageAspect) {
+      // Wide desktop & ultrawide:
+      // Fit width and ensure top headroom so the bottle cap is never clipped
       drawWidth = width;
       drawHeight = width / imageAspect;
+      drawX = 0;
+      drawY = Math.max(0, (height - drawHeight) * 0.15);
+    } else if (canvasAspect >= 1) {
+      // Standard laptop & landscape tablet:
+      // Fit height and center horizontally
+      drawHeight = height;
+      drawWidth = height * imageAspect;
+      drawX = (width - drawWidth) / 2;
+      drawY = 0;
+    } else {
+      // Mobile portrait & vertical tablet:
+      // Proportionally scale to hero subject size without excessive cropping
+      const mobileScale = Math.min(1.65, Math.max(1.15, (height / (width / imageAspect)) * 0.72));
+      drawWidth = width * mobileScale;
+      drawHeight = drawWidth / imageAspect;
+      drawX = (width - drawWidth) / 2;
+      drawY = (height - drawHeight) / 2;
     }
 
-    // Perfect center alignment
-    const drawX = (width - drawWidth) / 2;
-    const drawY = (height - drawHeight) / 2;
+    // High quality interpolation
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
-    // Draw centered cover image
     ctx.drawImage(
       img,
       drawX,
@@ -355,28 +371,13 @@ export function OrangeCinema() {
       ref={containerRef}
       className="relative w-full bg-[#070707] text-[#F8F8F9] select-none font-sans"
     >
-      {/* Pinned Viewport Stage */}
+      {/* Pinned Viewport Stage - Height dynamically fits below header across devices */}
       <div
         ref={stickyRef}
-        className="relative w-full h-[calc(100vh+1rem)] sm:h-[calc(100vh-0rem)] flex flex-col justify-between overflow-hidden py-0"
+        className="relative w-full h-[calc(100dvh-1rem)] sm:h-[calc(100vh-0rem)] flex flex-col justify-between overflow-hidden"
       >
-        {/* Top Viewfinder Details */}
-        <div className="absolute top-4 left-5 text-white/20 font-mono text-xs pointer-events-none hidden sm:block z-20">
-          + SEQ // 01.CINEMA
-        </div>
-
-        <div className="absolute top-4 right-5 text-white/20 font-mono text-xs pointer-events-none hidden sm:block z-20">
-          + NATURAL LIGHTING
-        </div>
-
-        {/* Bottom Viewfinder Details */}
-        <div className="absolute bottom-8 left-5 text-white/20 font-mono text-xs pointer-events-none hidden sm:block z-20">
-          + BOTANICAL DISSECTION
-        </div>
-
-        <div className="absolute bottom-8 right-5 text-white/20 font-mono text-xs pointer-events-none hidden sm:block z-20">
-          + ZERO COMPRESSION
-        </div>
+        {/* Subtle Warm Ambient Glow */}
+        <div className="absolute inset-0 pointer-events-none z-[5] bg-[radial-gradient(ellipse_at_center,rgba(247,103,7,0.06)_0%,transparent_65%)]" />
 
         {/* Canvas Image Sequence */}
         <div className="relative w-full h-full flex-1 flex items-center justify-center min-h-0 overflow-hidden">
@@ -399,10 +400,10 @@ export function OrangeCinema() {
           )}
         </div>
 
-        {/* Vignette Overlay */}
-        <div className="absolute inset-0 pointer-events-none z-10 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(7,7,7,0.7)_80%,#070707_100%)]" />
+        {/* Vignette Overlay for Seamless Dark Integration */}
+        <div className="absolute inset-0 pointer-events-none z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(7,7,7,0.65)_75%,#070707_100%)]" />
 
-        {/* Editorial Text Overlays */}
+        {/* Editorial Text Overlays - Responsive Frosted Editorial Cards */}
         <div className="absolute inset-0 pointer-events-none z-20 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
           {CINEMA_SCENES.map((scene, idx) => (
             <div
@@ -416,12 +417,12 @@ export function OrangeCinema() {
               }}
               className={`absolute transition-none ${scene.positionClass}`}
             >
-              <div className="border-l-2 border-[#F76707] pl-4 sm:pl-5">
-                <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#F76707] font-semibold block mb-1">
+              <div className="backdrop-blur-md bg-[#070707]/40 sm:bg-transparent border-l-2 border-[#F76707] pl-3.5 sm:pl-5 pr-4 py-2 sm:py-1 rounded-sm sm:rounded-none shadow-sm sm:shadow-none">
+                <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.25em] text-[#F76707] font-semibold block mb-1">
                   {scene.tag}
                 </span>
 
-                <h3 className="text-2xl sm:text-4xl font-bold tracking-[-0.03em] uppercase text-white leading-none mb-2">
+                <h3 className="text-xl sm:text-3xl md:text-4xl font-bold tracking-tight uppercase text-white leading-tight sm:leading-none mb-1.5 sm:mb-2">
                   {scene.title}
                 </h3>
 
@@ -434,27 +435,27 @@ export function OrangeCinema() {
         </div>
 
         {/* Bottom Scrub Bar & Telemetry */}
-        <div className="absolute bottom-5 left-4 sm:left-6 right-4 sm:right-6 z-30 flex items-center justify-between text-xs font-mono uppercase tracking-[0.25em] text-[#7A7A80] pointer-events-none">
-          <div className="flex items-center gap-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F76707]" />
+        <div className="absolute bottom-4 sm:bottom-5 left-4 sm:left-6 right-4 sm:right-6 z-30 flex items-center justify-between text-[10px] sm:text-xs font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#7A7A80] pointer-events-none">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F76707] shadow-[0_0_8px_#F76707] animate-pulse" />
 
-            <span>
-              SCROLL CINEMA // CHAPTER 01
+            <span className="tracking-[0.18em] sm:tracking-[0.25em]">
+              SCROLL
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2">
-            <span>SCROLL TO EVOLVE</span>
+          <div className="flex items-center gap-2 text-white/50">
+            <span className="hidden sm:inline">SCROLL TO EVOLVE</span>
 
-            <ArrowDown className="w-3.5 h-3.5 text-[#F76707]" />
+            <ArrowDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F76707] animate-bounce" />
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Bar with Amber Glow */}
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.08] z-30">
           <div
             ref={progressBarRef}
-            className="h-full w-0 bg-[#F76707] transition-[width] duration-75"
+            className="h-full w-0 bg-gradient-to-r from-[#F76707] to-[#FFA726] shadow-[0_0_10px_rgba(247,103,7,0.7)] transition-[width] duration-75"
           />
         </div>
       </div>
