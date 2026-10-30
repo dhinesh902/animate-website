@@ -116,31 +116,12 @@ export function OrangeCinema() {
     ctx.fillStyle = "#070707";
     ctx.fillRect(0, 0, width, height);
 
-    // Maintain aspect ratio with safe headroom so top cap is never cropped or hidden
+    // Fit strictly by width
     const imgAspect = img.naturalWidth / img.naturalHeight;
-    const canvasAspect = width / height;
-
-    // Scale factor to keep bottle cap and upper steam fully in view with headroom
-    const scale = 0.88;
-
-    let drawW: number;
-    let drawH: number;
-
-    if (canvasAspect > imgAspect) {
-      drawH = height * scale;
-      drawW = drawH * imgAspect;
-    } else {
-      drawW = width * scale;
-      drawH = drawW / imgAspect;
-      if (drawH > height * scale) {
-        drawH = height * scale;
-        drawW = drawH * imgAspect;
-      }
-    }
-
-    const drawX = (width - drawW) / 2;
-    // Position with intentional top clearance so header never touches or hides the cap
-    const drawY = (height - drawH) / 2 + 20;
+    const drawW = width;
+    const drawH = width / imgAspect;
+    const drawX = 0;
+    const drawY = (height - drawH) / 2;
 
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
   }, []);
