@@ -1,26 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+  
+  --color-ink: #070707;
+  --color-offblack: #0c0b0a;
+  --color-burnt: #D84B00;
+  --color-citrus: #F76707;
+  --color-cream: #F4EFE6;
+  --color-editorial: #F8F8F9;
+  --color-muted: #7A7A80;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-ink: #070707;
+  --color-burnt: #D84B00;
+  --color-citrus: #F76707;
+  --color-cream: #F4EFE6;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background-color: #070707;
+  color: #F8F8F9;
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  overflow-x: hidden;
+  letter-spacing: -0.015em;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #070707;
+  color: #F8F8F9;
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #F76707;
+  color: #070707;
+}
+
+/* Minimalist Editorial Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070707;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232326;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F76707;
+}
+
+/* Editorial Typography Helpers */
+.font-editorial-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-editorial-sans {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+}
+
+/* Editorial Dividers */
+.rule-light {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.rule-dark {
+  border-color: rgba(7, 7, 7, 0.15);
+}
+
+/* Canvas styling */
+canvas {
+  touch-action: none;
+}
+
+/* High Fashion Button States */
+.editorial-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #F76707;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+}
+
+.editorial-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.editorial-btn span {
+  position: relative;
+  z-index: 1;
 }
