@@ -18,9 +18,8 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-500 font-sans ${
-          scrolled ? "bg-[#070707]/90 py-3.5 border-b border-white/[0.08]" : "bg-transparent py-5"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-500 font-sans ${scrolled ? "bg-[#070707]/90 py-3.5 border-b border-white/[0.08]" : "bg-transparent py-5"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Top Left: JRINK® Wordmark */}
@@ -54,4 +53,3 @@ export function Header() {
     </>
   );
 }
-
