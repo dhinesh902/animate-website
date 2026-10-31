@@ -29,15 +29,6 @@ export function Hero() {
           <span>/</span>
           <span>CITRUS COLLECTION</span>
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="hidden md:block"
-        >
-          <span>AUTONOMOUS BRAND STUDY // VOL. 01</span>
-        </motion.div>
       </div>
 
       {/* Main Asymmetrical Stage */}

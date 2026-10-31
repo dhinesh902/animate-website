@@ -8,16 +8,23 @@ export function Footer() {
   };
 
   const navLinks = [
-    { name: "HOME", href: "#hero" },
-    { name: "EXPERIENCE", href: "#cinema" },
-    { name: "ABOUT", href: "#editorial" },
-    { name: "CONTACT", href: "#footer" },
+    { name: "HOME", href: "/#hero" },
+    { name: "EXPERIENCE", href: "/#cinema" },
+    { name: "ABOUT", href: "/about" },
+    { name: "CONTACT", href: "/contact" },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
       e.preventDefault();
       const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (href.startsWith("/#") && typeof window !== "undefined" && window.location.pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace("/", "");
+      const el = document.querySelector(targetId);
       if (el) {
         el.scrollIntoView({ behavior: "smooth" });
       }

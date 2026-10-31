@@ -10,19 +10,28 @@ interface MenuOverlayProps {
 
 export function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
   const menuItems = [
-    { number: "01", title: "HOME", href: "#hero", tag: "THE OPENING" },
-    { number: "02", title: "THE ORANGE", href: "#editorial", tag: "VISUAL STUDY" },
-    { number: "03", title: "THE EXPERIENCE", href: "#cinema", tag: "SCROLL CINEMA" },
-    { number: "04", title: "OUR WORLD", href: "#freshness", tag: "THE ATTITUDE" },
-    { number: "05", title: "CONTACT", href: "#footer", tag: "GET IN TOUCH" },
+    { number: "01", title: "HOME", href: "/#hero", tag: "THE OPENING" },
+    { number: "02", title: "ABOUT US", href: "/about", tag: "OUR STORY" },
+    { number: "03", title: "THE EXPERIENCE", href: "/#cinema", tag: "SCROLL CINEMA" },
+    { number: "04", title: "THE ORANGE", href: "/#editorial", tag: "VISUAL STUDY" },
+    { number: "05", title: "CONTACT", href: "/contact", tag: "GET IN TOUCH" },
   ];
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
     onClose();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (href.startsWith("/#") && typeof window !== "undefined" && window.location.pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace("/", "");
+      const target = document.querySelector(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
     }
   };
 
