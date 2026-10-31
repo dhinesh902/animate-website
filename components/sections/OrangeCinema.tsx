@@ -22,28 +22,28 @@ const CINEMA_SCENES: SceneOverlay[] = [
     title: "IT STARTS WITH ONE.",
     subtitle:
       "A singular fruit selected for exceptional vitality and solar depth.",
-    positionClass: "top-4 sm:top-8 left-4 sm:left-6 text-left max-w-[280px] sm:max-w-sm",
+    positionClass: "top-5 sm:top-8 left-4 sm:left-8 text-left max-w-[280px] sm:max-w-sm",
   },
   {
     tag: "02 // CHARACTER",
     title: "NATURALLY BOLD.",
     subtitle:
       "Raw citrus oil and aromatic terpenes captured in suspension.",
-    positionClass: "bottom-14 sm:bottom-16 right-4 sm:right-6 text-right max-w-[280px] sm:max-w-sm ml-auto",
+    positionClass: "bottom-14 sm:bottom-16 right-4 sm:right-8 text-right max-w-[280px] sm:max-w-sm ml-auto",
   },
   {
     tag: "03 // PRESENCE",
     title: "IMPOSSIBLE TO IGNORE.",
     subtitle:
       "Colour that commands attention without speaking a word.",
-    positionClass: "top-4 sm:top-8 right-4 sm:right-6 text-right max-w-[280px] sm:max-w-sm ml-auto",
+    positionClass: "top-5 sm:top-8 right-4 sm:right-8 text-right max-w-[280px] sm:max-w-sm ml-auto",
   },
   {
     tag: "04 // HARVEST",
     title: "THE BEAUTY OF ORANGE.",
     subtitle:
       "Nature's architecture transformed into bottled art.",
-    positionClass: "bottom-14 sm:bottom-16 left-4 sm:left-6 text-left max-w-[280px] sm:max-w-sm",
+    positionClass: "bottom-14 sm:bottom-16 left-4 sm:left-8 text-left max-w-[280px] sm:max-w-sm",
   },
 ];
 
@@ -99,28 +99,36 @@ export function OrangeCinema() {
     let drawX: number;
     let drawY: number;
 
+    // Safe clearances to ensure the bottle cap and full subject are never clipped by the header or viewport edge
+    const topPadding = Math.max(28, Math.round(height * 0.055));
+    const bottomPadding = Math.max(28, Math.round(height * 0.045));
+    const availHeight = height - topPadding - bottomPadding;
+    const availWidth = width * 0.95;
+
     if (canvasAspect >= imageAspect) {
       // Wide desktop & ultrawide:
-      // Fit width and ensure top headroom so the bottle cap is never clipped
-      drawWidth = width;
-      drawHeight = width / imageAspect;
-      drawX = 0;
-      drawY = Math.max(0, (height - drawHeight) * 0.15);
-    } else if (canvasAspect >= 1) {
-      // Standard laptop & landscape tablet:
-      // Fit height and center horizontally
-      drawHeight = height;
-      drawWidth = height * imageAspect;
+      // Fit within available bounds with guaranteed top headroom below the header
+      const scale = Math.min(availWidth / imgWidth, availHeight / imgHeight);
+      drawWidth = imgWidth * scale;
+      drawHeight = imgHeight * scale;
       drawX = (width - drawWidth) / 2;
-      drawY = 0;
+      drawY = topPadding + (availHeight - drawHeight) * 0.45;
+    } else if (canvasAspect >= 0.8) {
+      // Standard laptop & landscape tablet:
+      // Proportionally fit with safe top clearance
+      const scale = Math.min(width / imgWidth, availHeight / imgHeight);
+      drawWidth = imgWidth * scale;
+      drawHeight = imgHeight * scale;
+      drawX = (width - drawWidth) / 2;
+      drawY = topPadding + (availHeight - drawHeight) / 2;
     } else {
       // Mobile portrait & vertical tablet:
-      // Proportionally scale to hero subject size without excessive cropping
-      const mobileScale = Math.min(1.65, Math.max(1.15, (height / (width / imageAspect)) * 0.72));
+      // Proportionally scale without cutting the top cap under mobile header
+      const mobileScale = Math.min(1.45, Math.max(1.05, (availHeight / (width / imageAspect)) * 0.78));
       drawWidth = width * mobileScale;
       drawHeight = drawWidth / imageAspect;
       drawX = (width - drawWidth) / 2;
-      drawY = (height - drawHeight) / 2;
+      drawY = topPadding + Math.max(0, (availHeight - drawHeight) * 0.25);
     }
 
     // High quality interpolation
@@ -374,7 +382,7 @@ export function OrangeCinema() {
       {/* Pinned Viewport Stage - Height dynamically fits below header across devices */}
       <div
         ref={stickyRef}
-        className="relative w-full h-[calc(100dvh-1rem)] sm:h-[calc(100vh-0rem)] flex flex-col justify-between overflow-hidden"
+        className="relative w-full h-[calc(100dvh-4rem)] sm:h-[calc(100vh-5rem)] flex flex-col justify-between overflow-hidden"
       >
         {/* Subtle Warm Ambient Glow */}
         <div className="absolute inset-0 pointer-events-none z-[5] bg-[radial-gradient(ellipse_at_center,rgba(247,103,7,0.06)_0%,transparent_65%)]" />

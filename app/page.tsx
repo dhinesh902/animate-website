@@ -1,5 +1,6 @@
 import { Header } from "@/components/navigation/Header";
 import { Hero } from "@/components/sections/Hero";
+import { ProductRailGallery } from "@/components/ui/product-rail-gallery";
 import { OrangeCinema } from "@/components/sections/OrangeCinema";
 import { OrangeEditorial } from "@/components/sections/OrangeEditorial";
 import { Freshness } from "@/components/sections/Freshness";
@@ -20,7 +21,10 @@ export default function Home() {
       {/* 01 — Hero: A Fruit With An Attitude */}
       <Hero />
 
-      {/* 02 — Main Attraction: Scroll Cinema (HTML5 Canvas + GSAP Pinning) */}
+      {/* 02 — Product rail gallery: tactile browsing for the collection */}
+      <ProductRailGallery />
+
+      {/* 03 — Main Attraction: Scroll Cinema (HTML5 Canvas + GSAP Pinning) */}
       <OrangeCinema />
 
       {/* 03 — The Orange: An Editorial Study */}

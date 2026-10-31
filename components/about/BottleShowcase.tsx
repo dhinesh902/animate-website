@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import { bottleFrames } from "@/lib/imageManifest";
-import { ArrowDown, Sparkles, Aperture, Layers } from "lucide-react";
+import { ArrowDown, Aperture, Layers } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,6 +72,7 @@ export function BottleShowcase() {
   const percentLabelRef = useRef<HTMLSpanElement | null>(null);
 
   const bottleLayerRef = useRef<HTMLDivElement | null>(null);
+  const productShellRef = useRef<HTMLDivElement | null>(null);
   const glowLayerRef = useRef<HTMLDivElement | null>(null);
   const gridLayerRef = useRef<HTMLDivElement | null>(null);
 
@@ -94,7 +95,13 @@ export function BottleShowcase() {
     const { width, height } = canvas;
     ctx.clearRect(0, 0, width, height);
 
-    const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+    // Safe clearances so bottle top cap and bottom splash/base are 100% visible and never clipped
+    const safeTop = Math.max(50, Math.round(height * 0.08));
+    const safeBottom = Math.max(65, Math.round(height * 0.10));
+    const availHeight = height - safeTop - safeBottom;
+    const availWidth = width * 0.92;
+
+    const scale = Math.min(availWidth / image.naturalWidth, availHeight / image.naturalHeight);
     const drawWidth = image.naturalWidth * scale;
     const drawHeight = image.naturalHeight * scale;
 
@@ -103,7 +110,7 @@ export function BottleShowcase() {
     ctx.drawImage(
       image,
       (width - drawWidth) / 2,
-      (height - drawHeight) / 2,
+      safeTop + (availHeight - drawHeight) / 2,
       drawWidth,
       drawHeight
     );
@@ -169,6 +176,35 @@ export function BottleShowcase() {
   }, [drawFrame]);
 
   useEffect(() => {
+    const stage = stageRef.current;
+    const shell = productShellRef.current;
+
+    if (!stage || !shell) return;
+
+    const updateCamera = (event: PointerEvent) => {
+      const rect = stage.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+      shell.style.transform = `rotateX(${(-y * 18).toFixed(2)}deg) rotateY(${(x * 22).toFixed(2)}deg) scale3d(1.04, 1.04, 1.04)`;
+      shell.style.transition = "transform 180ms ease-out";
+    };
+
+    const resetCamera = () => {
+      shell.style.transform = "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+      shell.style.transition = "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)";
+    };
+
+    stage.addEventListener("pointermove", updateCamera);
+    stage.addEventListener("pointerleave", resetCamera);
+
+    return () => {
+      stage.removeEventListener("pointermove", updateCamera);
+      stage.removeEventListener("pointerleave", resetCamera);
+    };
+  }, []);
+
+  useEffect(() => {
     const section = sectionRef.current;
     const stage = stageRef.current;
     const canvas = canvasRef.current;
@@ -230,7 +266,6 @@ export function BottleShowcase() {
               if (!chapter) return;
 
               const [start, end] = CHAPTERS[index].range;
-              const visible = value >= start && value <= end;
 
               const enter = clamp((value - start) / 0.07, 0, 1);
               const exit = clamp((end - value) / 0.07, 0, 1);
@@ -248,40 +283,40 @@ export function BottleShowcase() {
       timeline
         .fromTo(
           bottleLayerRef.current,
-          { scale: 1.14, yPercent: 4, rotateX: 7 },
-          { scale: 1, yPercent: 0, rotateX: 0, duration: 0.25 },
+          { scale: 1.02, yPercent: 1, rotateX: 3 },
+          { scale: 0.98, yPercent: 0, rotateX: 0, duration: 0.25 },
           0
         )
         .fromTo(
           glowLayerRef.current,
-          { opacity: 0.15, scale: 0.75 },
-          { opacity: 1, scale: 1.15, duration: 0.45 },
+          { opacity: 0.15, scale: 0.8 },
+          { opacity: 0.85, scale: 1.1, duration: 0.45 },
           0
         )
         .fromTo(
           gridLayerRef.current,
-          { opacity: 0, yPercent: 12 },
-          { opacity: 0.55, yPercent: 0, duration: 0.3 },
+          { opacity: 0, yPercent: 10 },
+          { opacity: 0.45, yPercent: 0, duration: 0.3 },
           0
         )
         .to(
           bottleLayerRef.current,
-          { scale: 1.06, yPercent: -2, rotateX: -4, duration: 0.7 },
+          { scale: 1.02, yPercent: -1, rotateX: -2, duration: 0.7 },
           0.3
         )
         .to(
           glowLayerRef.current,
-          { xPercent: 12, rotate: 12, duration: 0.7 },
+          { xPercent: 8, rotate: 8, duration: 0.7 },
           0.3
         )
         .to(
           bottleLayerRef.current,
-          { scale: 1.18, yPercent: 2, rotateX: 5, duration: 0.7 },
+          { scale: 1.0, yPercent: 0, rotateX: 0, duration: 0.7 },
           0.65
         )
         .to(
           glowLayerRef.current,
-          { xPercent: -12, rotate: -12, duration: 0.7 },
+          { xPercent: -8, rotate: -8, duration: 0.7 },
           0.65
         );
 
@@ -335,13 +370,22 @@ export function BottleShowcase() {
             ref={bottleLayerRef}
             className="relative h-full w-full max-w-6xl [transform-style:preserve-3d]"
           >
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 h-full w-full object-contain"
-            />
+            <div
+              ref={productShellRef}
+              className="relative h-full w-full will-change-transform [transform-style:preserve-3d]"
+              style={{
+                transform: "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+                transition: "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
+            >
+              <canvas
+                ref={canvasRef}
+                className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_28px_70px_rgba(255,121,0,0.28)]"
+              />
 
-            {/* Reflection */}
-            <div className="pointer-events-none absolute bottom-[8%] left-1/2 h-[18%] w-[46%] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(closest-side,rgba(255,121,0,0.20),transparent)] blur-2xl" />
+              {/* Reflection */}
+              <div className="pointer-events-none absolute bottom-[8%] left-1/2 h-[18%] w-[46%] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(closest-side,rgba(255,121,0,0.20),transparent)] blur-2xl" />
+            </div>
           </div>
 
           {/* Loading state */}
@@ -381,7 +425,7 @@ export function BottleShowcase() {
         <div className="pointer-events-none absolute inset-0 z-20 opacity-[0.035] mix-blend-overlay [background-image:repeating-linear-gradient(0deg,white_0_1px,transparent_1px_3px)]" />
 
         {/* Top HUD */}
-        <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 sm:px-8">
+        <div className="absolute inset-x-0 top-16 sm:top-20 z-30 flex items-center justify-between px-5 py-3 sm:px-8 pointer-events-none">
           <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.35em] text-white/40">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#FF7900]" />
             Bottle Sequence
@@ -430,9 +474,11 @@ export function BottleShowcase() {
         </div>
 
         {/* Bottom cinematic HUD */}
-        <div className="absolute inset-x-0 bottom-0 z-30 px-5 pb-6 sm:px-8">
+        <div className="absolute inset-x-0 bottom-0 z-30 px-5 pb-6 sm:px-8 pointer-events-none">
           <div className="mx-auto flex max-w-6xl items-end justify-between gap-6">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-white/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FF7900] shadow-[0_0_8px_#FF7900]" />
+              <span>FRAME</span>
               <span ref={frameLabelRef}>001 / {bottleFrames.length || 150}</span>
             </div>
 
@@ -452,9 +498,8 @@ export function BottleShowcase() {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
-              <Sparkles className="h-3 w-3 text-[#FF7900]" />
-              Scroll
+            <div className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/60">
+              <span>SCROLL TO ROTATE</span>
               <ArrowDown className="h-3 w-3 animate-bounce text-[#FF7900]" />
             </div>
           </div>
